@@ -1,9 +1,13 @@
-name: Simple Workflow
+name: cicd-orchestrator
 
 on:
   push:
     branches:
       - main
+
+# Add permissions block to allow triggering other workflows
+permissions:
+  actions: write
 
 jobs:
   say_foo:
@@ -11,3 +15,16 @@ jobs:
     steps:
       - name: Output foo
         run: echo "foo"
+      - name: Trigger cicd-journald workflow
+        uses: actions/github-script@v6
+        with:
+          script: |
+            await github.rest.actions.createWorkflowDispatch({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              workflow_id: 'cicd-journald.yaml',
+              ref: context.ref,
+              inputs: {
+                servers: 'foobar'
+              }
+            });
