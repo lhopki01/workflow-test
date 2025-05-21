@@ -10,21 +10,46 @@ permissions:
   actions: write
 
 jobs:
-  say_foo:
+  job_1:
     runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        server: [1, 2, 3]
+      fail-fast: false
+    outputs:
+      server: ${{ steps.output_server.outputs.server }}
     steps:
-      - name: Output foo
-        run: echo "foo"
-      - name: Trigger cicd-journald workflow
-        uses: actions/github-script@v6
-        with:
-          script: |
-            await github.rest.actions.createWorkflowDispatch({
-              owner: context.repo.owner,
-              repo: context.repo.repo,
-              workflow_id: 'cicd-journald.yaml',
-              ref: context.ref,
-              inputs: {
-                servers: 'foobar'
-              }
-            });
+      - name: Output server input
+        id: output_server
+        run: |
+          echo $GITHUB_OUTPUT
+          cat $GITHUB_OUTPUT
+          echo "Server: ${{ matrix.server }}"
+          echo "server=${{ matrix.server }}" >> $GITHUB_OUTPUT
+          cat $GITHUB_OUTPUT
+          if [ ${{ matrix.server }} -eq 1 ]; then
+            echo "Server is 1"
+          elif [ ${{ matrix.server }} -eq 2 ]; then
+            echo "Server is 2"
+          else
+            echo "Server is 3"
+          fi
+  job_2:
+    runs-on: ubuntu-latest
+    needs: job_1
+    steps:
+      - name: Output results
+        run: |
+          echo "needs.job_1.result: ${{ needs.job_1.result }}"
+          echo "needs.job_1.outputs: ${{ toJson(needs.job_1.outputs) }}"
+
+  #say_foo:
+  #  runs-on: ubuntu-latest
+  #  steps:
+  #    - name: Trigger cicd-journald workflow
+  #      run: |
+  #        curl -X POST \
+  #          -H "Authorization: token ${{ secrets.GITHUB_TOKEN }}" \
+  #          -H "Accept: application/vnd.github.v3+json" \
+  #          https://api.github.com/repos/${{ github.repository }}/actions/workflows/cicd-journald.yaml/dispatches \
+  #          -d '{"inputs":{"servers":"[\"foo\", \"bar\"]"}}'

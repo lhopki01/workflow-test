@@ -4,15 +4,35 @@ on:
   workflow_dispatch:
     inputs:
       servers:
-        description: 'Servers to target'
+        description: 'JSON string array of servers to target (e.g., ["server1", "server2"], defaults to ["all"])'
         required: false
-        default: 'all'
+        default: '["all"]'
         type: string
 
 jobs:
+  matrix_servers:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        server: ${{ fromJson(github.event.inputs.servers) }}
+    steps:
+      - name: Output server input
+        run: |
+          echo "Server: ${{ matrix.server }}"
+
   output_servers:
     runs-on: ubuntu-latest
     steps:
       - name: Output servers input
         run: |
-          echo "Servers: ${{ github.event.inputs.servers }}"
+          echo "Raw servers input: ${{ github.event.inputs.servers }}"
+          echo "Iterating over servers:"
+          for server in $(echo '${{ github.event.inputs.servers }}' | jq -r '.[]'); do
+            echo "  - $server"
+          done
+        # If you need to pass it to another action that expects a JSON array string,
+        # you can directly use ${{ github.event.inputs.servers }}
+        # If you need to use it as a matrix, you can do:
+        # strategy:
+        #   matrix:
+        #     server: ${{ fromJson(github.event.inputs.servers) }}
