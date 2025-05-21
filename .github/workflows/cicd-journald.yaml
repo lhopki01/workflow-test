@@ -1,0 +1,18 @@
+name: cicd-journald
+
+on:
+  workflow_dispatch:
+    inputs:
+      servers:
+        description: 'Servers to target'
+        required: false
+        default: 'all'
+        type: string
+
+jobs:
+  output_servers:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Output servers input
+        run: |
+          echo "Servers: ${{ github.event.inputs.servers }}"

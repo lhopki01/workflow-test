@@ -1,0 +1,13 @@
+name: Simple Workflow
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  say_foo:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Output foo
+        run: echo "foo"
