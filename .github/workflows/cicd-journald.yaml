@@ -25,7 +25,7 @@ jobs:
     steps:
       - name: Output servers input
         run: |
-          echo "Main branch job"
+          echo "test-branch branch job"
           echo "Raw servers input: ${{ github.event.inputs.servers }}"
           echo "Iterating over servers:"
           for server in $(echo '${{ github.event.inputs.servers }}' | jq -r '.[]'); do

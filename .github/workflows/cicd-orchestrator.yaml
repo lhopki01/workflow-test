@@ -3,7 +3,7 @@ name: cicd-orchestrator
 on:
   push:
     branches:
-      - main
+      - test-branch
 
 # Add permissions block to allow triggering other workflows
 permissions:
