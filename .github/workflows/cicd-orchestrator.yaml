@@ -8,6 +8,9 @@ on:
 # Add permissions block to allow triggering other workflows
 permissions:
   actions: write
+  contents: write
+  id-token: write
+  pull-requests: write
 
 jobs:
   #job_1:
@@ -42,15 +45,29 @@ jobs:
   #      run: |
   #        echo "needs.job_1.result: ${{ needs.job_1.result }}"
   #        echo "needs.job_1.outputs: ${{ toJson(needs.job_1.outputs) }}"
-
-  foo:
+  commit:
     runs-on: ubuntu-latest
     steps:
-      - name: Trigger cicd-journald workflow
+      - name: Checkout
+        uses: actions/checkout@v3
+      - name: Modify README.md
         run: |
+          echo -e "\nHello, world!" >> README.md
+      - uses: stefanzweifel/git-auto-commit-action@v4
+        with:
+          commit_message: "Autocommiting README.md"
+          file_pattern: "README.md"
+          skip_dirty_check: false
+          skip_fetch: false
+          branch: main
+  #foo:
+  #  runs-on: ubuntu-latest
+  #  steps:
+  #    - name: Trigger cicd-journald workflow
+  #      run: |
 
-          curl -X POST \
-            -H "Authorization: token ${{ secrets.GITHUB_TOKEN }}" \
-            -H "Accept: application/vnd.github.v3+json" \
-            https://api.github.com/repos/${{ github.repository }}/actions/workflows/cicd-journald.yaml/dispatches \
-            -d '{"ref": "${{ github.ref }}", "inputs":{"servers":"[\"foo\", \"bar\"]"}}'
+  #        curl -X POST \
+  #          -H "Authorization: token ${{ secrets.GITHUB_TOKEN }}" \
+  #          -H "Accept: application/vnd.github.v3+json" \
+  #          https://api.github.com/repos/${{ github.repository }}/actions/workflows/cicd-journald.yaml/dispatches \
+  #          -d '{"ref": "${{ github.ref }}", "inputs":{"servers":"[\"foo\", \"bar\"]"}}'
