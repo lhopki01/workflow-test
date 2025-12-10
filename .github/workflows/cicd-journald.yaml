@@ -18,5 +18,3 @@ jobs:
       - name: Output servers input
         run: |
           echo "servers=$servers"
-          echo "$servers" | grep -qE '^[0-9a-z,-]*$'
-          ls
