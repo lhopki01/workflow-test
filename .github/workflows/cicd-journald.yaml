@@ -6,7 +6,6 @@ on:
       servers:
         description: String array of servers to target (e.g., "server1,server2", defaults to "all")
         required: true
-        default: 'all'
         type: string
 
 jobs:
