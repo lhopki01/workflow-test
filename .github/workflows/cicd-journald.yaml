@@ -5,7 +5,7 @@ on:
     inputs:
       servers:
         description: String array of servers to target (e.g., "server1,server2", defaults to "all")
-        required: false
+        required: true
         default: 'all'
         type: string
 
