@@ -1,0 +1,45 @@
+name: Text Matrix Workflow
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  generate_matrices:
+    runs-on: ubuntu-latest
+    outputs:
+      matrix1_data: ${{ steps.set_matrix_outputs.outputs.data1 }}
+      matrix2_data: ${{ steps.set_matrix_outputs.outputs.data2 }}
+    steps:
+      - name: Set Matrix Outputs
+        id: set_matrix_outputs
+        run: |
+          echo 'data1=[]' >> $GITHUB_OUTPUT
+          echo 'data2=["cat","dog"]' >> $GITHUB_OUTPUT
+          cat $GITHUB_OUTPUT
+
+  matrix_job_1:
+    needs: generate_matrices
+    # Conditionally skip this job if matrix1_data is an empty array string
+    if: needs.generate_matrices.outputs.matrix1_data != '[]'
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        item: ${{ fromJson(needs.generate_matrices.outputs.matrix1_data) }}
+    steps:
+      - name: Process item from matrix_job_1
+        run: 'echo "Matrix Job 1 - Item: ${{ matrix.item }}"'
+
+  matrix_job_2:
+    needs: [generate_matrices, matrix_job_1] # Ensures it runs after matrix_job_1, and also needs generate_matrices for its outputs
+    # Condition to run if generate_matrices succeeded, AND (matrix_job_1 succeeded OR matrix_job_1 was skipped)
+    # always() is needed to ensure this 'if' condition is evaluated even if matrix_job_1 (a 'needs' dependency) is skipped.
+    if: always() && needs.generate_matrices.result == 'success' && (needs.matrix_job_1.result == 'success' || needs.matrix_job_1.result == 'skipped')
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        pet: ${{ fromJson(needs.generate_matrices.outputs.matrix2_data) }}
+    steps:
+      - name: Process pet from matrix_job_2
+        run: 'echo "Matrix Job 2 - Pet: ${{ matrix.pet }}"'
