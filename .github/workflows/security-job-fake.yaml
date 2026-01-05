@@ -1,9 +1,9 @@
 name: security-job
 
 on:
-  push:
+  pull_request:
     branches:
-      - test-branch
+      - main
 
 # Add permissions block to allow triggering other workflows
 permissions:
